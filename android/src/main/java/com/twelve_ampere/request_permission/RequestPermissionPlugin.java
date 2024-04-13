@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -89,53 +90,64 @@ public class RequestPermissionPlugin implements
                 // resultCode is either
                 // Activity.RESULT_OK = -1 or
                 // Activity.RESULT_CANCELED = 0
-
-                String permission = "";
-                switch (data.getAction()) {
-                    case Settings
-                            .ACTION_MANAGE_OVERLAY_PERMISSION:
-                        permission = Manifest.permission.SYSTEM_ALERT_WINDOW;
-                        break;
-
-
-                    case Settings
-                            .ACTION_REQUEST_SET_AUTOFILL_SERVICE:
-                        if (Utils.isOreoOrAbove())
-                            permission = Manifest.permission.BIND_AUTOFILL_SERVICE;
-                        break;
-
-                    default:
-                        break;
-                }
-
-                // We have to check whether the user granted the permission or not, because
-                // resultCode always equals Activity.RESULT_CANCELED if the user comes back into
-                // the app via the return arrows in the top left corner.
-                final int code = hasPermission(activityBinding.getActivity(), permission)
-                        ? PackageManager.PERMISSION_GRANTED
-                        : PackageManager.PERMISSION_DENIED;
-
                 Log.i(
                         LOG_TAG,
                         "\n\nActivityResultListener"
-                                + "\npermission: " + permission
+                                + "\npermission: " + data.toString()
                                 + "\nrequestCode: " + requestCode
                                 + "\nresultCode: " + resultCode
-                                + "\ncode: " + code
 
                 );
+                try {
+                    String permission = "";
+                    switch (Objects.requireNonNull(data.getAction())) {
+                        case Settings
+                                .ACTION_MANAGE_OVERLAY_PERMISSION:
+                            permission = Manifest.permission.SYSTEM_ALERT_WINDOW;
+                            break;
 
-                if (null != eventSink) {
-                    // Sending this as JSON format as well for compatibility
-                    // reasons with the API on the Dart side.
-                    eventSink.success(
-                            "{\"requestCode\":" + requestCode
-                                    + ", \"permissions\":" + Utils.toJSONArray(permission)
-                                    + ", \"grantResults\":" + Utils.toJSONArray(code)
-                                    + "}"
+
+                        case Settings
+                                .ACTION_REQUEST_SET_AUTOFILL_SERVICE:
+                            if (Utils.isOreoOrAbove())
+                                permission = Manifest.permission.BIND_AUTOFILL_SERVICE;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    // We have to check whether the user granted the permission or not, because
+                    // resultCode always equals Activity.RESULT_CANCELED if the user comes back into
+                    // the app via the return arrows in the top left corner.
+                    final int code = hasPermission(activityBinding.getActivity(), permission)
+                            ? PackageManager.PERMISSION_GRANTED
+                            : PackageManager.PERMISSION_DENIED;
+
+                    Log.i(
+                            LOG_TAG,
+                            "\n\nActivityResultListener"
+                                    + "\npermission: " + permission
+                                    + "\nrequestCode: " + requestCode
+                                    + "\nresultCode: " + resultCode
+                                    + "\ncode: " + code
+
                     );
-                } else {
-                    Log.e(LOG_TAG, "onRequestPermissionsResult, eventSink is null");
+
+                    if (null != eventSink) {
+                        // Sending this as JSON format as well for compatibility
+                        // reasons with the API on the Dart side.
+                        eventSink.success(
+                                "{\"requestCode\":" + requestCode
+                                        + ", \"permissions\":" + Utils.toJSONArray(permission)
+                                        + ", \"grantResults\":" + Utils.toJSONArray(code)
+                                        + "}"
+                        );
+                    } else {
+                        Log.e(LOG_TAG, "onRequestPermissionsResult, eventSink is null");
+                    }
+                }catch (Exception ignored){
+
                 }
 
                 return true;
