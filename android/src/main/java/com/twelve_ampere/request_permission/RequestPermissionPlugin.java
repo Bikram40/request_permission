@@ -90,15 +90,16 @@ public class RequestPermissionPlugin implements
                 // resultCode is either
                 // Activity.RESULT_OK = -1 or
                 // Activity.RESULT_CANCELED = 0
-                Log.i(
-                        LOG_TAG,
-                        "\n\nActivityResultListener"
-                                + "\npermission: " + data.toString()
-                                + "\nrequestCode: " + requestCode
-                                + "\nresultCode: " + resultCode
 
-                );
                 try {
+                    Log.i(
+                            LOG_TAG,
+                            "\n\nActivityResultListener"
+                                    + "\npermission: " + data.toString()
+                                    + "\nrequestCode: " + requestCode
+                                    + "\nresultCode: " + resultCode
+
+                    );
                     String permission = "";
                     switch (Objects.requireNonNull(data.getAction())) {
                         case Settings
